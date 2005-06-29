@@ -1,34 +1,51 @@
 package Bio::Medpost;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use strict;
 use File::Temp qw/ :POSIX /;
 use Exporter::Lite;
-our @EXPORT = qw(medpost);
+our @EXPORT = qw(medpost medpost_file);
 
 use Bio::Medpost::Var;
+use Cwd qw(abs_path getcwd);
 
+
+sub _medpost_backend {
+    my $file = shift;
+    my $argstr = join q/ /, @_;
+    $file = abs_path($file);
+    chdir $Bio::Medpost::Var::medpost_path;
+#    print STDERR "$Bio::Medpost::Var::medpost_script $argstr $file\n";
+    [
+     map{/(.+)_(.+)/; [$1, $2]}
+     split / /, `$Bio::Medpost::Var::medpost_script $argstr $file`
+     ]
+}
+
+sub medpost_file {
+    my $file = shift;
+    _medpost_backend($file, @_);
+}
 
 sub medpost {
   my $sentence = shift;
-  $sentence=<<SENTENCE;
+  
+  $sentence=
+  my ($fh, $file) = tmpnam();
+  
+  print {$fh}<<SENTENCE;
 .I65536
 .Tfoobar
 .A$sentence
 .E
 SENTENCE
-  
-  my ($fh, $file) = tmpnam();
-  
-  print {$fh} $sentence;
   close $fh;
-  chdir $Bio::Medpost::Var::medpost_path;
-  my $r = [
-	   map{/(.+)_(.+)/; [$1, $2]}
-	   split / /, `$Bio::Medpost::Var::medpost_script $file`
-	  ];
+
+  my $r = _medpost_backend($file, @_);
+
   unlink $file;
+
   return $r;
 }
 
@@ -46,6 +63,14 @@ Bio::Medpost - Part of speech tagger for MEDLINE text
     use Bio::Medpost;
 
     $r = medpost('We observed an increase in mitogen-activated protein kinase (MAPK) activity.');
+
+    # You can put options following the text.
+    $r = medpost($text_string, qw(-penn));
+
+    # You can input a file
+    $r = medpost_file($text_file);
+
+    $r = medpost_file($text_file, qw(-penn -xml));
 
     use Data::Dumper;
 

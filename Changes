@@ -1,0 +1,3 @@
+0.02 Wed, 29 Jun 2005 18:33:32 +0800
+	- added medpost_file()
+	- Now it allows options in the function call.
