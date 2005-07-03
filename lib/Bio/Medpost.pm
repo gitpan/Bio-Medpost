@@ -1,6 +1,6 @@
 package Bio::Medpost;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use strict;
 use File::Temp qw/ :POSIX /;
@@ -17,9 +17,10 @@ sub _medpost_backend {
     $file = abs_path($file);
     my $original_dir = Cwd::abs_path(Cwd::getcwd);
     chdir $Bio::Medpost::Var::medpost_path;
+    my $delimiter = $argstr =~ /-penn/ ? '/' : '_';
 #    print STDERR "$Bio::Medpost::Var::medpost_script $argstr $file\n";
     my $r = [
-	     map{/(.+)_(.+)/; [$1, $2]}
+	     map{m!(.+)${delimiter}(.+)!; [$1, $2]}
 	     split / /, `$Bio::Medpost::Var::medpost_script $argstr $file`
 	     ];
     chdir $original_dir;
