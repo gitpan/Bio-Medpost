@@ -7,3 +7,4 @@ $raw_sentence = 'For the purpose p-450 of experimental infection with human hepa
 ok($r = Bio::Medpost::medpost($raw_sentence));
 is($r->[2][0], 'purpose');
 is($r->[2][1], 'NN');
+

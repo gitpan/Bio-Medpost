@@ -1,5 +1,5 @@
 name: Bio-Medpost
-version: 0.02
+version: 0.03
 abstract: Part of speech tagger for MEDLINE text
 author: Yung-chung Lin <xern@cpan.org>
 license: perl

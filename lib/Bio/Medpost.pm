@@ -1,6 +1,6 @@
 package Bio::Medpost;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use strict;
 use File::Temp qw/ :POSIX /;
@@ -15,12 +15,15 @@ sub _medpost_backend {
     my $file = shift;
     my $argstr = join q/ /, @_;
     $file = abs_path($file);
+    my $original_dir = Cwd::abs_path(Cwd::getcwd);
     chdir $Bio::Medpost::Var::medpost_path;
 #    print STDERR "$Bio::Medpost::Var::medpost_script $argstr $file\n";
-    [
-     map{/(.+)_(.+)/; [$1, $2]}
-     split / /, `$Bio::Medpost::Var::medpost_script $argstr $file`
-     ]
+    my $r = [
+	     map{/(.+)_(.+)/; [$1, $2]}
+	     split / /, `$Bio::Medpost::Var::medpost_script $argstr $file`
+	     ];
+    chdir $original_dir;
+    return $r;
 }
 
 sub medpost_file {
@@ -31,7 +34,6 @@ sub medpost_file {
 sub medpost {
   my $sentence = shift;
   
-  $sentence=
   my ($fh, $file) = tmpnam();
   
   print {$fh}<<SENTENCE;
